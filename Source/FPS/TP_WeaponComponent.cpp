@@ -71,12 +71,8 @@ void UTP_WeaponComponent::AttachWeapon(AFPSCharacter* TargetCharacter)
 	Character = TargetCharacter;
 
 	// Check that the character is valid, and has no rifle yet
-	if (Character == nullptr || Character->GetHasRifle())
-	{
+	if (Character == nullptr)
 		return;
-	}
-	
-	Character->SetWeaponComponent(this);
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
@@ -85,7 +81,7 @@ void UTP_WeaponComponent::AttachWeapon(AFPSCharacter* TargetCharacter)
 	// switch bHasRifle so the animation blueprint can switch to another animation set
 	Character->SetHasRifle(true);
 
-	UE_LOG(LogTemp, Warning, TEXT("GameplayAbility : %s"), GameplayAbilty);
+	Character->AddWeapon(this);
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

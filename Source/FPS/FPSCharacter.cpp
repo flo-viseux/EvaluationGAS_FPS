@@ -102,6 +102,13 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 		// Fire
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AFPSCharacter::Fire);
+
+		// Heal
+		EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Triggered, this, &AFPSCharacter::Heal);
+
+		// ChangeWeapon
+		EnhancedInputComponent->BindAction(ChangeWeaponUpAction, ETriggerEvent::Triggered, this, &AFPSCharacter::ChangeWeaponUp);
+		EnhancedInputComponent->BindAction(ChangeWeaponDownAction, ETriggerEvent::Triggered, this, &AFPSCharacter::ChangeWeaponDown);
 	}
 	else
 	{
@@ -138,13 +145,56 @@ void AFPSCharacter::Look(const FInputActionValue& Value)
 
 void AFPSCharacter::Fire()
 {
-	if (weaponComponent != nullptr)
-		weaponComponent->Fire();
+	if (currentWeaponComponent != nullptr)
+		currentWeaponComponent->Fire();
 }
 
 void AFPSCharacter::Heal()
 {
 	AbilitySystemComponent->TryActivateAbilityByClass(GA_Heal);
+}
+
+
+void AFPSCharacter::ChangeWeaponUp()
+{
+	if (weaponsComponents.Num() > 1)
+		weaponId = (weaponId + 1) % weaponsComponents.Num();
+	else
+		weaponId = 0;
+		
+	SetWeaponComponent();
+}
+
+void AFPSCharacter::ChangeWeaponDown()
+{
+	if (weaponsComponents.Num() > 1)
+		weaponId = (weaponId - 1 + weaponsComponents.Num()) % weaponsComponents.Num();
+	else
+		weaponId = 0;
+		
+	SetWeaponComponent();
+}
+
+void AFPSCharacter::SetWeaponComponent()
+{
+	if (weaponsComponents.Num() < 1)
+		return;
+    	
+	currentWeaponComponent = weaponsComponents[weaponId];
+
+	FString ObjectValue = currentWeaponComponent ? currentWeaponComponent->GameplayAbilty->GetName() : FString(TEXT("null"));
+
+	// Créer le texte à afficher en incluant la valeur de MyUObject
+	FText TextToDisplay = FText::Format(
+		NSLOCTEXT("YourNamespace", "YourKey", "Current weapon ability : {0}"),
+		FText::FromString(ObjectValue)
+	);
+
+	// Afficher le FText à l'écran
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TextToDisplay.ToString());
+	}
 }
 
 void AFPSCharacter::SetHasRifle(bool bNewHasRifle)

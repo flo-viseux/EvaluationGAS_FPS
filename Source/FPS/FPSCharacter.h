@@ -54,9 +54,17 @@ class AFPSCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 
-	/** Fire Input Action */
+	/** Heal Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* HealAction;
+
+	/** ChangeWeaponUp Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* ChangeWeaponUpAction;
+
+	/** ChangeWeaponDown Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* ChangeWeaponDownAction;
 	
 public:
 	AFPSCharacter();
@@ -72,15 +80,28 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UFPS_AbilitySystemComponent> AbilitySystemComponent;
 
+
+	/** Array of weapons */
+	TArray<UTP_WeaponComponent*> weaponsComponents;
+
+	/** Add weapon in the array of weapons */
+	void AddWeapon(UTP_WeaponComponent* WeaponComponent)
+	{
+		weaponsComponents.Add(WeaponComponent);
+
+		weaponId = weaponsComponents.Num() - 1;
+
+		SetWeaponComponent();
+	}
+
+	// Index of the current array's weapon
+	int weaponId;
 	
 	/** Current weapon */
-	UTP_WeaponComponent* weaponComponent;
+	UTP_WeaponComponent* currentWeaponComponent;
 
 	/** Setter to set the bool */
-    void SetWeaponComponent(UTP_WeaponComponent* WeaponComponent)
-    {
-    	weaponComponent = WeaponComponent;
-    }
+    void SetWeaponComponent();
 	
 
 	/** Bool for AnimBP to switch to another animation set */
@@ -121,6 +142,12 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	/** Called for change weapon input scroll wheel up */
+	void ChangeWeaponUp();
+
+	/** Called for change weapon input scroll wheel down */
+	void ChangeWeaponDown();
+
 	/** Called for firing input */
 	void Fire();
 
@@ -134,6 +161,7 @@ protected:
 public:
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
